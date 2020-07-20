@@ -1,19 +1,21 @@
 package com.example.databinding
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.navigation.Navigation
 import com.example.databinding.room.Note
 import com.example.databinding.room.NoteDataBase
 import kotlinx.android.synthetic.main.fragment_add_note.*
-import kotlinx.android.synthetic.main.item_note.*
 import kotlinx.coroutines.launch
 
 
 class AddNoteFragment : BaseFragment() {
+
+    private var note: Note? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -24,6 +26,14 @@ class AddNoteFragment : BaseFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        arguments?.let {
+            note = AddNoteFragmentArgs.fromBundle(it).note
+            titleET.setText(note?.title)
+            bodyET.setText(note?.body)
+        }
+
+
         buttonSave.setOnClickListener {
             val noteTitle:String = titleET.text.toString().trim()
             val noteBody :String = bodyET.text.toString().trim()
@@ -39,12 +49,24 @@ class AddNoteFragment : BaseFragment() {
             val newNote =Note(noteTitle , noteBody)
 
             launch {
-                saveNote(newNote)
+                if(note == null)
+                    saveNote(newNote)
+                else
+                    updateNote(newNote)
             }
 
 
 
             navigateBack()
+        }
+    }
+
+
+    private suspend fun updateNote(newNote :Note){
+        newNote.id = note!! .id
+        context?.let {
+            NoteDataBase(it).getNodeDao().updateNote(newNote)
+            Toast.makeText(it , "Note updated" ,  Toast.LENGTH_LONG).show()
         }
     }
 
