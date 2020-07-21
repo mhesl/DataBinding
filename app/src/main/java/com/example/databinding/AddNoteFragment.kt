@@ -1,9 +1,8 @@
 package com.example.databinding
 
+import android.app.AlertDialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.navigation.Navigation
 import com.example.databinding.room.Note
@@ -20,6 +19,7 @@ class AddNoteFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        setHasOptionsMenu(true)
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_add_note, container, false)
     }
@@ -80,5 +80,36 @@ class AddNoteFragment : BaseFragment() {
         Navigation.findNavController(buttonSave).navigate(action)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.note_menu , menu)
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when(item.itemId){
+            R.id.deleteNote -> {
+                note?.let {
+                    deleteNote()
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+    private fun deleteNote(){
+        context?.let {
+            AlertDialog.Builder(it).apply {
+                setTitle("Are you sure?")
+                setMessage("you cannot undo this operation")
+                setPositiveButton("Ok") {dialogInterface, i ->
+                    launch {
+                        NoteDataBase(it).getNodeDao().deleteNote(note!!)
+                        navigateBack()
+                    }
+                }
+                setNegativeButton("NO"){dialogInterface, i ->  }
+                show()
+            }
+        }
+    }
 }
