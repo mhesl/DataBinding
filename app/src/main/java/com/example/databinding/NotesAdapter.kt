@@ -10,7 +10,7 @@ import com.example.databinding.databinding.ItemNoteBinding
 import com.example.databinding.room.Note
 import kotlinx.android.synthetic.main.item_note.view.*
 
-class NotesAdapter (val notes : List<Note>): RecyclerView.Adapter<NotesAdapter.NoteViewHolder>(){
+class NotesAdapter (val notes : List<Note>): RecyclerView.Adapter<NotesAdapter.NoteViewHolder>() , NoteClickListener{
 
     class NoteViewHolder(val view: ItemNoteBinding) : RecyclerView.ViewHolder(view.root)
 
@@ -24,13 +24,27 @@ class NotesAdapter (val notes : List<Note>): RecyclerView.Adapter<NotesAdapter.N
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         holder.view.note = notes[position]
+        holder.view.listener = this
 //        holder.view.titleTV.text = notes[position].title
 //        holder.view.bodyTV.text = notes[position].body
         holder.view.root.setOnClickListener {
-            val action = HomeFragmentDirections.actionAddNote()
-            action.note = notes[position]
-            Navigation.findNavController(it).navigate(action)
+
         }
 
+    }
+
+    override fun noteClicked(view: View) {
+        val id :Int? = view.idTV.text.toString().toIntOrNull()
+        var note :Note? = null
+        for (n : Note in notes)
+            if(n.id == id){
+                note = n
+                break
+            }
+        note?.let {
+            val action = HomeFragmentDirections.actionAddNote()
+            action.note = note
+            Navigation.findNavController(view).navigate(action)
+        }
     }
 }
