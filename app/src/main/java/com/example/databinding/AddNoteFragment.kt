@@ -55,8 +55,6 @@ class AddNoteFragment : BaseFragment() {
                     updateNote(newNote)
             }
 
-
-
             navigateBack()
         }
     }
